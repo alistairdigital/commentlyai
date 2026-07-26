@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CommentlyAI</title>
+<style>
+  :root {
+    --bg: #0F0A1E;
+    --surface: #17112B;
+    --surface-2: #1E1638;
+    --border: rgba(255,255,255,0.08);
+    --text: #FFFFFF;
+    --text-secondary: rgba(255,255,255,0.65);
+    --violet: #5B21B6;
+    --cyan: #06B6D4;
+    --gradient: linear-gradient(90deg, #5B21B6 0%, #06B6D4 100%);
+    --error: #E97366;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-bottom: 40px; }
+  .logo-mark { width: 48px; height: 48px; margin-bottom: 16px; }
+  .wordmark { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+  .wordmark .ai { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { margin: 8px 0 0; font-size: 15px; color: var(--text-secondary); font-weight: 500; }
+
+  section { margin-bottom: 32px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin: 0 0 16px;
+  }
+
+  /* Base voice */
+  .voice-row { display: flex; gap: 10px; margin-bottom: 4px; }
+  .voice-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .voice-row input::placeholder { color: var(--text-secondary); }
+  .field-hint { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+
+  /* Context Selector */
+  .context-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: var(--surface-2);
+    cursor: pointer;
+    user-select: none;
+  }
+  .chip.active { background: var(--gradient); color: #fff; border-color: transparent; font-weight: 600; }
+  .chip.add { border-style: dashed; }
+
+  .add-preset-form { display: none; margin-top: 16px; gap: 8px; flex-direction: column; }
+  .add-preset-form.open { display: flex; }
+  .add-preset-form input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .add-preset-form input::placeholder { color: var(--text-secondary); }
+  .form-actions { display: flex; gap: 8px; margin-top: 4px; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--gradient); color: #fff; }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+
+  /* Generator */
+  textarea, .url-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea::placeholder, .url-input::placeholder { color: var(--text-secondary); }
+  textarea { min-height: 110px; margin-bottom: 10px; }
+  .url-input { margin-bottom: 16px; }
+
+  .result-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-top: 16px;
+  }
+  .result-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .copy-btn {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--text-secondary);
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .error-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(233,115,102,0.10);
+    border: 1px solid rgba(233,115,102,0.35);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+  }
+  .error-card-icon {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--error); color: var(--bg); font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .error-card-body { flex: 1; }
+  .error-card-title { margin: 0 0 4px; font-size: 14px; font-weight: 600; color: #fff; }
+  .error-card-text { margin: 0; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .retry-btn {
+    flex-shrink: 0; align-self: center; border: 1px solid rgba(233,115,102,0.45);
+    color: #F3A79E; background: transparent; border-radius: 8px; padding: 8px 16px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* Log */
+  .log-entry {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    background: var(--bg);
+  }
+  .log-entry:last-child { margin-bottom: 0; }
+  .log-entry-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .log-entry-context { font-size: 12px; font-weight: 600; color: var(--cyan); }
+  .log-entry-time { font-size: 11px; color: var(--text-secondary); white-space: nowrap; }
+  .log-entry-post { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.5; }
+  .log-entry-comment { font-size: 14px; line-height: 1.5; margin-bottom: 8px; }
+  .log-entry-footer { display: flex; justify-content: space-between; align-items: center; }
+  .star-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-secondary); }
+  .star-btn.active { color: #F5C518; }
+  .log-empty { color: var(--text-secondary); font-size: 13px; text-align: center; padding: 24px 0; }
+  .log-url { font-size: 11px; color: var(--cyan); text-decoration: none; word-break: break-all; }
+
+  @media (max-width: 560px) {
+    .voice-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <svg class="logo-mark" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#5B21B6"/>
+          <stop offset="1" stop-color="#06B6D4"/>
+        </linearGradient>
+      </defs>
+      <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g)"/>
+      <path d="M25 14C35.4934 14 44 22.0589 44 32C44 41.9411 35.4934 50 25 50" stroke="#0F0A1E" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <rect x="18" y="25" width="4" height="14" rx="2" fill="#0F0A1E"/>
+      <rect x="26" y="18" width="4" height="28" rx="2" fill="#0F0A1E"/>
+      <rect x="34" y="27" width="4" height="10" rx="2" fill="#0F0A1E"/>
+    </svg>
+    <h1 class="wordmark">Commently<span class="ai">AI</span></h1>
+    <p class="tagline">Your voice. At scale.</p>
+  </div>
+
+  <section>
+    <div class="card">
+      <h2>Your Base Voice</h2>
+      <div class="voice-row">
+        <input type="text" id="voice-1" placeholder="e.g. curious" maxlength="30" />
+        <input type="text" id="voice-2" placeholder="e.g. direct" maxlength="30" />
+        <input type="text" id="voice-3" placeholder="e.g. warm" maxlength="30" />
+      </div>
+      <p class="field-hint">Three words that describe how you sound. This stays constant — only the register shifts per context.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Context Selector</h2>
+      <div class="context-chips" id="context-chips"></div>
+      <div class="add-preset-form" id="add-preset-form">
+        <input type="text" id="new-preset-label" placeholder="Preset name (e.g. Fintech Investors)" maxlength="40" />
+        <input type="text" id="new-preset-creator" placeholder="Creator type (e.g. investor)" maxlength="40" />
+        <input type="text" id="new-preset-industry" placeholder="Industry / niche (e.g. fintech)" maxlength="40" />
+        <input type="text" id="new-preset-voice" placeholder="Voice profile (e.g. sharp + data-driven)" maxlength="60" />
+        <div class="form-actions">
+          <button class="btn btn-primary" id="save-preset-btn" type="button">Save preset</button>
+          <button class="btn btn-ghost" id="cancel-preset-btn" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>New Comment</h2>
+      <textarea id="post-text" placeholder="Paste the LinkedIn post text here..."></textarea>
+      <input type="text" class="url-input" id="post-url" placeholder="Post URL (optional)" />
+      <button class="btn btn-primary" id="generate-btn" type="button">✨ Generate comment</button>
+
+      <div id="result-container"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Creator / Post Log</h2>
+      <div id="log-container"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  // -------------------------------------------------------------------
+  // Storage helpers
+  // -------------------------------------------------------------------
+  const STORAGE_KEYS = {
+    presets: 'commently_presets',
+    activePreset: 'commently_active_preset',
+    baseVoice: 'commently_base_voice',
+    log: 'commently_log',
+  };
+
+  const DEFAULT_PRESETS = [
+    { id: 'ai-tech-founders', label: 'AI / Tech Founders', creatorType: 'founder', industry: 'AI / tech', voiceProfile: 'technical + precise' },
+    { id: 'creative-design', label: 'Creative / Design', creatorType: 'designer', industry: 'creative / design', voiceProfile: 'reflective + warm' },
+    { id: 'finance-investing', label: 'Finance / Investing', creatorType: 'investor', industry: 'finance / investing', voiceProfile: 'sharp + data-driven' },
+    { id: 'wellness', label: 'Wellness', creatorType: 'practitioner', industry: 'wellness', voiceProfile: 'warm + grounded' },
+    { id: 'founder-reflections', label: 'Founder Reflections', creatorType: 'founder', industry: 'founder reflections', voiceProfile: 'reflective + honest' },
+  ];
+
+  function loadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+      console.error('Failed to parse localStorage key', key, e);
+      return fallback;
+    }
+  }
+  function saveJSON(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  let presets = loadJSON(STORAGE_KEYS.presets, DEFAULT_PRESETS);
+  let activePresetId = localStorage.getItem(STORAGE_KEYS.activePreset) || presets[0].id;
+  let baseVoice = loadJSON(STORAGE_KEYS.baseVoice, ['', '', '']);
+  let log = loadJSON(STORAGE_KEYS.log, []);
+
+  // -------------------------------------------------------------------
+  // Base voice inputs
+  // -------------------------------------------------------------------
+  const voiceInputs = [document.getElementById('voice-1'), document.getElementById('voice-2'), document.getElementById('voice-3')];
+  voiceInputs.forEach((input, i) => {
+    input.value = baseVoice[i] || '';
+    input.addEventListener('input', () => {
+      baseVoice[i] = input.value;
+      saveJSON(STORAGE_KEYS.baseVoice, baseVoice);
+    });
+  });
+
+  // -------------------------------------------------------------------
+  // Context Selector
+  // -------------------------------------------------------------------
+  const chipsContainer = document.getElementById('context-chips');
+  const addForm = document.getElementById('add-preset-form');
+
+  function renderChips() {
+    chipsContainer.innerHTML = '';
+    presets.forEach((preset) => {
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (preset.id === activePresetId ? ' active' : '');
+      chip.textContent = preset.label;
+      chip.addEventListener('click', () => {
+        activePresetId = preset.id;
+        localStorage.setItem(STORAGE_KEYS.activePreset, activePresetId);
+        renderChips();
+      });
+      chipsContainer.appendChild(chip);
+    });
+    const addChip = document.createElement('span');
+    addChip.className = 'chip add';
+    addChip.textContent = '+ Add preset';
+    addChip.addEventListener('click', () => {
+      addForm.classList.toggle('open');
+    });
+    chipsContainer.appendChild(addChip);
+  }
+
+  document.getElementById('save-preset-btn').addEventListener('click', () => {
+    const label = document.getElementById('new-preset-label').value.trim();
+    const creatorType = document.getElementById('new-preset-creator').value.trim();
+    const industry = document.getElementById('new-preset-industry').value.trim();
+    const voiceProfile = document.getElementById('new-preset-voice').value.trim();
+    if (!label || !creatorType || !industry || !voiceProfile) {
+      alert('Please fill in all fields to save a preset.');
+      return;
+    }
+    const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now();
+    presets.push({ id, label, creatorType, industry, voiceProfile });
+    saveJSON(STORAGE_KEYS.presets, presets);
+    activePresetId = id;
+    localStorage.setItem(STORAGE_KEYS.activePreset, activePresetId);
+    ['new-preset-label', 'new-preset-creator', 'new-preset-industry', 'new-preset-voice'].forEach((id) => {
+      document.getElementById(id).value = '';
+    });
+    addForm.classList.remove('open');
+    renderChips();
+  });
+
+  document.getElementById('cancel-preset-btn').addEventListener('click', () => {
+    addForm.classList.remove('open');
+  });
+
+  renderChips();
+
+  // -------------------------------------------------------------------
+  // Comment generation
+  // -------------------------------------------------------------------
+  const generateBtn = document.getElementById('generate-btn');
+  const resultContainer = document.getElementById('result-container');
+  const postTextEl = document.getElementById('post-text');
+  const postUrlEl = document.getElementById('post-url');
+
+  function getActivePreset() {
+    return presets.find((p) => p.id === activePresetId) || presets[0];
+  }
+
+  function renderResult(comment, source) {
+    resultContainer.innerHTML = `
+      <div class="result-card">
+        ${escapeHtml(comment)}
+        <div class="result-meta">
+          <span>${escapeHtml(getActivePreset().label)} · generated just now${source === 'gemini' ? ' · via fallback' : ''}</span>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(comment);
+      const btn = document.getElementById('copy-btn');
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  }
+
+  function renderError(message) {
+    resultContainer.innerHTML = `
+      <div class="error-card">
+        <div class="error-card-icon">!</div>
+        <div class="error-card-body">
+          <p class="error-card-title">Couldn't generate a comment</p>
+          <p class="error-card-text">${escapeHtml(message)}</p>
+        </div>
+        <button class="retry-btn" id="retry-btn">Try again</button>
+      </div>
+    `;
+    document.getElementById('retry-btn').addEventListener('click', generateComment);
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function generateComment() {
+    const postText = postTextEl.value.trim();
+    const postUrl = postUrlEl.value.trim();
+
+    if (!postText) {
+      renderError('Paste a LinkedIn post first — the comment box is empty.');
+      return;
+    }
+    if (voiceInputs.some((i) => !i.value.trim())) {
+      renderError('Fill in all three base voice words before generating.');
+      return;
+    }
+
+    const preset = getActivePreset();
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Generating...';
+    resultContainer.innerHTML = '';
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postText,
+          context: {
+            creatorType: preset.creatorType,
+            industry: preset.industry,
+            voiceProfile: preset.voiceProfile,
+          },
+          baseVoice: voiceInputs.map((i) => i.value.trim()),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        renderError(data.error || 'Something went wrong. Check your connection and try again.');
+        return;
+      }
+
+      renderResult(data.comment, data.source);
+      addLogEntry({
+        timestamp: new Date().toISOString(),
+        context: preset.label,
+        postText,
+        postUrl,
+        generatedComment: data.comment,
+        revisit: false,
+      });
+    } catch (err) {
+      console.error(err);
+      renderError('Claude and Gemini both timed out. Check your connection and try again.');
+    } finally {
+      generateBtn.disabled = false;
+      generateBtn.textContent = '✨ Generate comment';
+    }
+  }
+
+  generateBtn.addEventListener('click', generateComment);
+
+  // -------------------------------------------------------------------
+  // Creator / Post Log
+  // -------------------------------------------------------------------
+  const logContainer = document.getElementById('log-container');
+
+  function addLogEntry(entry) {
+    log.unshift(entry);
+    saveJSON(STORAGE_KEYS.log, log);
+    renderLog();
+  }
+
+  function toggleRevisit(index) {
+    log[index].revisit = !log[index].revisit;
+    saveJSON(STORAGE_KEYS.log, log);
+    renderLog();
+  }
+
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function renderLog() {
+    if (log.length === 0) {
+      logContainer.innerHTML = '<div class="log-empty">No comments generated yet. Your log will fill up here as you go.</div>';
+      return;
+    }
+    logContainer.innerHTML = log.map((entry, i) => `
+      <div class="log-entry">
+        <div class="log-entry-head">
+          <span class="log-entry-context">${escapeHtml(entry.context)}</span>
+          <span class="log-entry-time">${formatTime(entry.timestamp)}</span>
+        </div>
+        <div class="log-entry-post">${escapeHtml(truncate(entry.postText, 140))}</div>
+        <div class="log-entry-comment">${escapeHtml(entry.generatedComment)}</div>
+        <div class="log-entry-footer">
+          ${entry.postUrl ? `<a class="log-url" href="${escapeHtml(entry.postUrl)}" target="_blank" rel="noopener">${escapeHtml(truncate(entry.postUrl, 40))}</a>` : '<span></span>'}
+          <button class="star-btn${entry.revisit ? ' active' : ''}" data-index="${i}" title="Mark for revisit">${entry.revisit ? '★' : '☆'}</button>
+        </div>
+      </div>
+    `).join('');
+
+    logContainer.querySelectorAll('.star-btn').forEach((btn) => {
+      btn.addEventListener('click', () => toggleRevisit(parseInt(btn.dataset.index, 10)));
+    });
+  }
+
+  function truncate(str, n) {
+    return str.length > n ? str.slice(0, n).trim() + '…' : str;
+  }
+
+  renderLog();
+})();
+</script>
+</body>
+</html>
