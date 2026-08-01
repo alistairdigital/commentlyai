@@ -1,0 +1,256 @@
+:root {
+  --bg: #0F0A1E;
+  --panel: #170f2b;
+  --border: #2a2044;
+  --text: #E9E4F7;
+  --text-dim: #a89fc4;
+  --violet: #5B21B6;
+  --cyan: #06B6D4;
+  --gradient: linear-gradient(90deg, #5B21B6, #06B6D4);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Inter, Arial, sans-serif;
+}
+
+.topbar {
+  padding: 32px 24px 16px;
+  text-align: center;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.logo { width: 34px; height: 34px; }
+
+.wordmark h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+.brand-main { color: var(--text); font-weight: 800; }
+.brand-accent { color: var(--cyan); font-weight: 800; margin-left: 2px; }
+
+.tagline {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+.layout {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 8px 20px 64px;
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.panel h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.voice-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+input[type="text"],
+input[type="url"],
+select,
+textarea {
+  background: #0d0819;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  width: 100%;
+  font-family: inherit;
+}
+
+textarea { resize: vertical; margin-top: 12px; }
+input[type="url"] { margin-top: 10px; }
+
+.context-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.context-row select { flex: 1; }
+
+.context-detail {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.context-detail b { color: var(--text); }
+
+.add-preset-form {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.hidden { display: none !important; }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--gradient);
+  color: white;
+  margin-top: 12px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.result-area {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #0d0819;
+  border: 1px solid var(--border);
+}
+
+.result-meta {
+  font-size: 12px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+#result-comment {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.error-area {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+  font-size: 13px;
+}
+
+.log-list {
+  display: grid;
+  gap: 12px;
+}
+
+.log-entry {
+  background: #0d0819;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.log-entry-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.log-entry-context {
+  font-size: 12px;
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.log-entry-time {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.log-entry-post {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+
+.log-entry-comment {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.log-entry-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.star-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 6px 10px;
+}
+
+.star-btn.active {
+  color: #facc15;
+  border-color: #facc15;
+}
+
+.empty-state {
+  color: var(--text-dim);
+  font-size: 13px;
+}
